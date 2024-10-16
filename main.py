@@ -52,13 +52,16 @@ for task in tasks:
     for q_id, result in reranking_result.items():
         sorted_results = sorted(result.items(), key=lambda x: x[1], reverse=True)
         
-        for doc_id, score in sorted_results:
-            results_df = results_df.append({
+        temp_df = pd.DataFrame([
+            {
                 "Task": type(task).__name__,
                 "Query ID": q_id,
                 "Document ID": doc_id,
                 "Score": score
-            }, ignore_index=True)
+            } for doc_id, score in sorted_results
+        ])
+        
+        results_df = pd.concat([results_df, temp_df], ignore_index=True)
 
 output_dir = './results'
 results_df.to_csv(f"{output_dir}/combined_results.csv", index=False)
