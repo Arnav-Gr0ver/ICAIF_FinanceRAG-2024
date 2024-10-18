@@ -1,7 +1,6 @@
 from sentence_transformers import CrossEncoder
 import logging
 import os
-import glob
 import pandas as pd
 
 from financerag.rerank import CrossEncoderReranker
@@ -9,10 +8,10 @@ from financerag.retrieval import DenseRetrieval, SentenceTransformerEncoder
 from financerag.tasks import (
     ConvFinQA,
     FinDER,
-    # FinQABench,
-    # FinanceBench,
-    # MultiHiertt,
-    # TATQA,
+    FinQABench,
+    FinanceBench,
+    MultiHiertt,
+    TATQA,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -20,10 +19,10 @@ logging.basicConfig(level=logging.INFO)
 tasks = {
     "FinDER": FinDER(),
     "ConvFinQA": ConvFinQA(),
-    # "FinQABench": FinQABench(),
-    # "FinanceBench": FinanceBench(),
-    # "MultiHiertt": MultiHiertt(),
-    # "TATQA": TATQA()
+    "FinQABench": FinQABench(),
+    "FinanceBench": FinanceBench(),
+    "MultiHiertt": MultiHiertt(),
+    "TATQA": TATQA()
 }
 
 encoder_model = SentenceTransformerEncoder(
@@ -54,22 +53,7 @@ for task_name, task in tasks.items():
         batch_size=32
     )
 
-    output_dir = f'./results/{task_name}'
-    os.makedirs(output_dir, exist_ok=True)
-    output_file_path = os.path.join(output_dir, 'results.csv')
-    task.save_results(output_dir=output_file_path)
+    output_dir = './results'
+    task.save_results(output_dir=output_dir)
 
-results_list = []
-csv_files = glob.glob('./results/*/results.csv')
-
-print(len(results_list))
-
-for file_path in csv_files:
-    task_name = os.path.basename(os.path.dirname(file_path))
-    task_results = pd.read_csv(file_path)
-    task_results['Task'] = task_name
-    results_list.append(task_results)
-
-if results_list:
-    all_results = pd.concat(results_list, ignore_index=True)
-    all_results.to_csv('./results/combined_results.csv', index=False)
+    task_results_file = os.path.join(output_dir, f'{task_name}.csv')
