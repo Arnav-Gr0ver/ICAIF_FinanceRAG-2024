@@ -8,21 +8,21 @@ from financerag.retrieval import DenseRetrieval, SentenceTransformerEncoder
 from financerag.tasks import (
     ConvFinQA,
     FinDER,
-    FinQABench,
-    FinanceBench,
-    MultiHiertt,
-    TATQA,
+    # FinQABench,
+    # FinanceBench,
+    # MultiHiertt,
+    # TATQA,
 )
 
 logging.basicConfig(level=logging.INFO)
 
 tasks = {
     "FinDER": FinDER(),
-    "ConvFinQA": ConvFinQA(),
-    "FinQABench": FinQABench(),
-    "FinanceBench": FinanceBench(),
-    "MultiHiertt": MultiHiertt(),
-    "TATQA": TATQA()
+    "ConvFinQA": ConvFinQA()
+    # "FinQABench": FinQABench(),
+    # "FinanceBench": FinanceBench(),
+    # "MultiHiertt": MultiHiertt(),
+    # "TATQA": TATQA()
 }
 
 encoder_model = SentenceTransformerEncoder(
@@ -63,6 +63,8 @@ for task_name, task in tasks.items():
         task_results = pd.read_csv(task_results_file)
         task_results['Task'] = task_name
         results_list.append(task_results)
+
+print(len(results_list))
 
 if results_list:
     all_results = pd.concat(results_list, ignore_index=True)
