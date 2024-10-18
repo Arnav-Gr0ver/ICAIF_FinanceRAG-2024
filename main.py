@@ -1,6 +1,7 @@
 from sentence_transformers import CrossEncoder
 import logging
 import os
+import glob
 import pandas as pd
 
 from financerag.rerank import CrossEncoderReranker
@@ -18,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 
 tasks = {
     "FinDER": FinDER(),
-    "ConvFinQA": ConvFinQA()
+    "ConvFinQA": ConvFinQA(),
     # "FinQABench": FinQABench(),
     # "FinanceBench": FinanceBench(),
     # "MultiHiertt": MultiHiertt(),
@@ -39,8 +40,6 @@ reranker = CrossEncoderReranker(
     model=CrossEncoder('cross-encoder/ms-marco-MiniLM-L-12-v2')
 )
 
-results_list = []
-
 for task_name, task in tasks.items():
     logging.info(f"Processing task: {task_name}")
 
@@ -56,15 +55,20 @@ for task_name, task in tasks.items():
     )
 
     output_dir = f'./results/{task_name}'
-    task.save_results(output_dir=output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    output_file_path = os.path.join(output_dir, 'results.csv')
+    task.save_results(output_dir=output_file_path)
 
-    task_results_file = os.path.join(output_dir, 'results.csv')
-    if os.path.exists(task_results_file):
-        task_results = pd.read_csv(task_results_file)
-        task_results['Task'] = task_name
-        results_list.append(task_results)
+results_list = []
+csv_files = glob.glob('./results/*/results.csv')
 
 print(len(results_list))
+
+for file_path in csv_files:
+    task_name = os.path.basename(os.path.dirname(file_path))
+    task_results = pd.read_csv(file_path)
+    task_results['Task'] = task_name
+    results_list.append(task_results)
 
 if results_list:
     all_results = pd.concat(results_list, ignore_index=True)
