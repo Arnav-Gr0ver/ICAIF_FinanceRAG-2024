@@ -57,3 +57,20 @@ for task_name, task in tasks.items():
     task.save_results(output_dir=output_dir)
 
     task_results_file = os.path.join(output_dir, f'{task_name}.csv')
+
+results_folder = 'results'
+
+dataframes = []
+
+for root, _, files in os.walk(results_folder):
+    for file in files:
+        if file == 'results.csv':
+            file_path = os.path.join(root, file)
+            df = pd.read_csv(file_path)
+            dataframes.append(df)
+
+combined_df = pd.concat(dataframes, ignore_index=True)
+
+combined_df.to_csv('combined_results.csv', index=False)
+
+logging.info("All results.csv files have been successfully concatenated into combined_results.csv")
