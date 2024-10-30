@@ -31,8 +31,8 @@ for task in tasks:
      
         hyde_res = RAG.search(hyde_context, k=3)
 
-        hyde_query = [i["text"] for i in hyde_res]
-        ' '.join(hyde_query)
+        hyde_query = [i["content"] for i in hyde_res]
+        hyde_query = ' '.join(hyde_query)
         hyde_query += f"\n Question: {query}"
 
         print(hyde_query)
