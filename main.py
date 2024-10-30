@@ -35,8 +35,6 @@ for task in tasks:
         hyde_query = ' '.join(hyde_query)
         hyde_query += f"\n Question: {query}"
 
-        print(hyde_query)
-
         results = RAG.search(hyde_query)
 
         for result in results:
