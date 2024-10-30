@@ -2,8 +2,10 @@ from ragatouille import RAGPretrainedModel
 from transformers import pipeline
 from datasets import load_dataset
 import pandas as pd
+import torch
 
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+model = pipeline(model="databricks/dolly-v2-3b", torch_dtype=torch.bfloat16, trust_remote_code=True, device_map="auto")
 
 tasks = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
 results_data = []
@@ -24,18 +26,12 @@ for task in tasks:
         query_id = query_dataset[i]["_id"]
         query = query_dataset[i]["text"]
 
-        prompt = f"""Please write a scientific paper passage to answer the question
-        Question: {query}
-        Passage:"""
-
-        messages = [
-            {"role": "user", "content": prompt},
-        ]
-        pipe = pipeline("text-generation", model="tiiuae/falcon-7b-instruct", trust_remote_code=True)
-        pipe(messages)
+        prompt = f"Please write a scientific paper passage to answer the question: {query}"
+        res = model(prompt)
+        context = res[0]["generated_text"]
     
         query = f"""
-            Context: {pipe(messages)}
+            Context: {context}
             Question: {query}
         """
 
