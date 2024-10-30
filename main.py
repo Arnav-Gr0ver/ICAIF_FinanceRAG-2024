@@ -26,18 +26,18 @@ for task in tasks:
         query_id = query_dataset[i]["_id"]
         query = query_dataset[i]["text"]
 
-        prompt = f"Please write a scientific paper passage to answer the question: {query}"
-        res = model(prompt)
-        context = res[0]["generated_text"]
-    
-        query = f"""
-            Context: {context}
-            Question: {query}
-        """
+        hyde_prompt = f"Please write a scientific paper passage to answer the question: {query}"
+        hyde_context = model(hyde_prompt, min_length=50, max_length=200)[0]["generated_text"]
+     
+        hyde_res = RAG.search(hyde_context, k=3)
 
-        print(query)
+        hyde_query = [i["text"] for i in hyde_res]
+        ' '.join(hyde_query)
+        hyde_query += f"\n Question: {query}"
 
-        results = RAG.search(query)
+        print(hyde_query)
+
+        results = RAG.search(hyde_query)
 
         for result in results:
             results_data.append({
