@@ -31,8 +31,8 @@ for task in tasks:
         Passage:"""
 
         inputs = tokenizer(prompt, return_tensors="pt")
-        generate_ids = model.generate(inputs.input_ids, max_length=100)
-        context = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        generate_ids = model.generate(inputs.input_ids, max_length=100, use_fast=False)
+        context = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False, use_fast=False)[0]
 
         query = f"""
             Context: {context}
