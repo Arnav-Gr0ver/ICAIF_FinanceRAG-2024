@@ -1,11 +1,9 @@
 from ragatouille import RAGPretrainedModel
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import pipeline
 from datasets import load_dataset
 import pandas as pd
 
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
-tokenizer = AutoTokenizer.from_pretrained("teknium/OpenHermes-2.5-Mistral-7B")
-model = AutoModelForCausalLM.from_pretrained("teknium/OpenHermes-2.5-Mistral-7B")
 
 tasks = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
 results_data = []
@@ -30,12 +28,14 @@ for task in tasks:
         Question: {query}
         Passage:"""
 
-        inputs = tokenizer(prompt, return_tensors="pt")
-        generate_ids = model.generate(inputs.input_ids, max_length=100, use_fast=False)
-        context = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False, use_fast=False)[0]
-
+        messages = [
+            {"role": "user", "content": prompt},
+        ]
+        pipe = pipeline("text-generation", model="tiiuae/falcon-7b-instruct", trust_remote_code=True)
+        pipe(messages)
+    
         query = f"""
-            Context: {context}
+            Context: {pipe(messages)}
             Question: {query}
         """
 
