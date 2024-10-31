@@ -3,9 +3,9 @@ from datasets import load_dataset
 
 qa_dataset = load_dataset("FinGPT/fingpt-fiqa_qa", split="train")
 
-trainer = RAGTrainer(model_name = "FinColBERT", pretrained_model_name = "colbert-ir/colbertv2.0")
+trainer = RAGTrainer(model_name="FinColBERT", pretrained_model_name="colbert-ir/colbertv2.0")
 
-qa_pairs = [(qa_dataset["input"][i], qa_dataset["output"][i]) for i in range(len(qa_dataset))]
+qa_pairs = list(zip(qa_dataset["input"], qa_dataset["output"]))
 
 print(qa_pairs)
 
