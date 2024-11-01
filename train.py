@@ -12,4 +12,3 @@ print(qa_pairs)
 trainer.prepare_training_data(raw_data=qa_pairs, data_out_path="./data/checkpoints/")
 
 trainer.train(batch_size=32)
-
