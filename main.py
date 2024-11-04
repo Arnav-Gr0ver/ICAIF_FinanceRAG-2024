@@ -6,7 +6,7 @@ import torch
 
 model_id = "meta-llama/Llama-3.2-3B-Instruct"
 
-PIPELINE = transformers.pipeline("text-generation", model=model_id, model_kwargs={"torch_dtype": torch.bfloat16}, device_map="auto")
+PIPELINE = transformers.pipeline("text-generation", model=model_id, model_kwargs={"torch_dtype": torch.bfloat16}, device_map="auto", max_new_tokens=50, truncation=True)
 RAG = RAGPretrainedModel.from_pretrained("SesameStreet/FinColBERT")
 TASKS = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
 
@@ -31,11 +31,10 @@ for task in TASKS:
         PROMPT = f"""
         Answer the following query:
         {query}
-        Give the rationale before answering
+        think through the rationale before answering
         """
 
-        CoT_query = PIPELINE(PROMPT)
-
+        CoT_query = query + " " + PIPELINE(PROMPT)[0]['generated_text'].split("$$$")[1]
         results = RAG.search(CoT_query)
 
         for result in results:
