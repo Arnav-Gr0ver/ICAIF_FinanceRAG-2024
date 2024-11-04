@@ -1,14 +1,24 @@
 from ragatouille import RAGPretrainedModel
 from datasets import load_dataset
 import pandas as pd
+import transformers
+import torch
 
+model_id = "meta-llama/Llama-3.2-3B-Instruct"
+query= None
+
+PIPELINE = transformers.pipeline("text-generation", model=model_id, model_kwargs={"torch_dtype": torch.bfloat16}, device_map="auto")
 RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
-
-tasks = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
+TASKS = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
+PROMPT = f"""
+Answer the following query:
+{query}
+Give the rationale before answering
+"""
 
 results_data = []
 
-for task in tasks:
+for task in TASKS:
     corpus_dataset = load_dataset("Linq-AI-Research/FinanceRAG", task, split="corpus")
     query_dataset = load_dataset("Linq-AI-Research/FinanceRAG", task, split="queries")
 
@@ -23,7 +33,10 @@ for task in tasks:
     for i in range(len(query_dataset)):
         query_id = query_dataset[i]["_id"]
         query = query_dataset[i]["text"]
-        results = RAG.search(query)
+
+        CoT_query = PIPELINE(PROMPT.format(query))
+
+        results = RAG.search(CoT_query)
 
         for result in results:
             results_data.append({
