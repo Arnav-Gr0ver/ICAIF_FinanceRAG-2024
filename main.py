@@ -1,19 +1,8 @@
 from ragatouille import RAGPretrainedModel
 from datasets import load_dataset
 import pandas as pd
-import transformers
-import torch
 import os
 
-MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct"
-PIPELINE = transformers.pipeline(
-    "text-generation", 
-    model=MODEL_ID, 
-    model_kwargs={"torch_dtype": torch.bfloat16}, 
-    device_map="auto", 
-    max_new_tokens=100, 
-    truncation=True
-)
 RAG = RAGPretrainedModel.from_pretrained("SesameStreet/FinColBERT")
 TASKS = ["ConvFinQA", "FinDER", "FinQA", "FinQABench", "FinanceBench", "MultiHiertt", "TATQA"]
 
@@ -36,13 +25,7 @@ for task in TASKS:
         query_id = query_dataset[i]["_id"]
         query = query_dataset[i]["text"]
 
-        PROMPT = f"""
-        Answer the following query:
-        {query}
-        give concise rationale before answering$$$
-        """
-        CoT_query = query + " " + PIPELINE(PROMPT)[0]['generated_text'].split("$$$")[1]
-        results = RAG.search(CoT_query)
+        results = RAG.search(query)
 
         for result in results:
             results_data.append({
